@@ -1,0 +1,76 @@
+{
+    "name": "video-salad-core",
+    "version": "0.0.1",
+    "description": "Multimedia muxer, demuxer, encoder",
+    "author": "Boats",
+    "license": "MIT",
+    "main": "dist/cjs/index.js",
+    "module": "dist/mjs/index.js",
+    "types": "dist/mjs/index.d.ts",
+    "exports": {
+        ".": {
+            "import": "./dist/mjs/index.js",
+            "require": "./dist/cjs/index.js"
+        }
+    },
+    "keywords": [
+        "video-salad",
+        "video-salad-core",
+        "ffmpeg",
+        "mux",
+        "demux",
+        "encode",
+        "convert",
+        "transcode",
+        "media",
+        "video",
+        "audio",
+        "subtitle",
+        "esm",
+        "nodejs"
+    ],
+    "scripts": {
+        "clean": "rimraf dist",
+        "clean-node-modules": "rimraf node_modules",
+        "deepclean": "npm run clean && npm run clean-node-modules",
+        "postinstall": "npm run build",
+        "build": "node build.js",
+        "watch": "node build.js watch",
+        "lint": "eslint src",
+        "lint-fix": "npm run lint -- --fix",
+        "prepare": "npm run build",
+        "_prepublishOnly": "npm test && npm run lint",
+        "test": "jest",
+        "coverage": "nyc --reporter=lcov --reporter=text npm run test",
+        "audit": "npm audit --production"
+    },
+    "bugs": {
+        "url": "https://github.com/video-salad/video-salad-core/issues"
+    },
+    "homepage": "https://github.com/video-salad/video-salad-core#readme",
+    "dependencies": {
+        "ajv": "^8.12.0",
+        "fluent-ffmpeg": "^2.1.2",
+        "winston": "^3.8.2"
+    },
+    "devDependencies": {
+        "@types/fluent-ffmpeg": "^2.1.21",
+        "@types/node": "^18.15.11",
+        "@types/winston": "^2.4.4",
+        "@typescript-eslint/eslint-plugin": "^5.58.0",
+        "@typescript-eslint/parser": "^5.58.0",
+        "dotenv": "^10.0.0",
+        "eslint": "^8.2.0",
+        "json-schema-typed": "^8.0.1",
+        "rimraf": "^4.4.1",
+        "source-map-support": "^0.5.20",
+        "typescript": "^5.0.4"
+    },
+    "files": [
+        "dist/"
+    ],
+    "engines": {
+        "node": ">=12.0.0",
+        "npm": ">=7.0.0"
+    }
+}
