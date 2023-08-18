@@ -318,6 +318,20 @@ export class IngredientBowl extends Bowl {
         }
     }
 
+    // Duration in seconds
+    public get duration() {
+        return this.ffProbeData.format.duration;
+    }
+
+    public get bitrate() {
+        return this.ffProbeData.format.bit_rate;
+    }
+
+    // Size in bytes
+    public get size() {
+        return this.ffProbeData.format.size;
+    }
+
     public get tags(): Tags {
         return this.ffProbeData.format.tags as Tags ?? {} as Tags;
     }

@@ -216,6 +216,14 @@ export abstract class StreamIngredient<T extends IngredientType = IngredientType
         }
     }
 
+    public static ParseDuration(duration: string) {
+        const durationSplit = duration.split(':');
+        if (durationSplit.length !== 3) {
+            return 0;
+        }
+        return Number(durationSplit[0]) * 60 * 60 + Number(durationSplit[1]) * 60 + Number(durationSplit[2]);
+    }
+
     // Codec of the stream
     public abstract get codec(): T;
 
@@ -229,8 +237,17 @@ export abstract class StreamIngredient<T extends IngredientType = IngredientType
         return Number(this.ffProbeStream.index);
     }
 
+    
+    /**
+     * Retrieves the duration in seconds of the stream.
+     *
+     * @return {number} The duration in seconds of the stream.
+     */
     public get duration() {
-        return Number(this.ffProbeStream.duration);
+        const duration = this.ffProbeStream.duration
+            ?? this.ffProbeStream.tags['DURATION']
+            ?? '';
+        return StreamIngredient.ParseDuration(duration);
     }
 
     public get tags(): Tags {
@@ -401,12 +418,16 @@ export class VideoIngredient extends StreamIngredient<VideoCodec, VideoChanges> 
     }
 
     public get bitrate() {
-        return Number(this.ffProbeStream.bit_rate);
+        return Number(this.ffProbeStream.bit_rate !== 'N/A' ? this.ffProbeStream.bit_rate : this.ffProbeStream.tags['BPS']);
     }
 
-    // Dressing size in bytes
+    // Size in bytes
     public get size() {
-        return (this.duration ?? 0 * this.bitrate ?? 0) / 8;
+        if (this.ffProbeStream.tags['NUMBER_OF_BYTES']) {
+            return Number(this.ffProbeStream.tags['NUMBER_OF_BYTES']);
+        } else {
+            return (this.duration * this.bitrate ?? 0) / 8;
+        }
     }
 
     public get width() {
@@ -415,6 +436,14 @@ export class VideoIngredient extends StreamIngredient<VideoCodec, VideoChanges> 
 
     public get height() {
         return Number(this.ffProbeStream.height);
+    }
+
+    public get averageFrameRate() {
+        return this.ffProbeStream.avg_frame_rate;
+    }
+
+    public get totalFrames() {
+        return Number(this.ffProbeStream.tags['NUMBER_OF_FRAMES']);
     }
 
     public set title(title: string) {
@@ -478,7 +507,7 @@ export class AudioIngredient extends StreamIngredient<AudioCodec, AudioChanges> 
     }
 
     public get bitrate() {
-        return this.changes?.bitrate ?? Number(this.ffProbeStream.bit_rate);
+        return Number(this.ffProbeStream.bit_rate !== 'N/A' ? this.ffProbeStream.bit_rate : this.ffProbeStream.tags['BPS']);
     }
 
     public set bitrate(value: number) {
@@ -487,9 +516,21 @@ export class AudioIngredient extends StreamIngredient<AudioCodec, AudioChanges> 
         this.changes.bitrate = value;
     }
 
-    // Dressing size in bytes
+    public get averageFrameRate() {
+        return this.ffProbeStream.avg_frame_rate;
+    }
+    
+    public get totalFrames() {
+        return Number(this.ffProbeStream.tags['NUMBER_OF_FRAMES']);
+    }
+
+    // Size in bytes
     public get size() {
-        return (this.duration ?? 0 * this.bitrate ?? 0) / 8;
+        if (this.ffProbeStream.tags['NUMBER_OF_BYTES']) {
+            return Number(this.ffProbeStream.tags['NUMBER_OF_BYTES']);
+        } else {
+            return (this.duration * this.bitrate ?? 0) / 8;
+        }
     }
 
     public get sampleRate() {
@@ -681,6 +722,27 @@ export class SubtitleIngredient extends StreamIngredient<SubtitleCodec, Subtitle
             default:
                 console.warn(`Unsupported subtitle codec: ${this.ffProbeStream.codec_name}`);
                 return this.ffProbeStream.codec_name as SubtitleCodec; // TODO: Check for other types and support them
+        }
+    }
+
+    public get bitrate() {
+        return Number(this.ffProbeStream.bit_rate !== 'N/A' ? this.ffProbeStream.bit_rate : this.ffProbeStream.tags['BPS']);
+    }
+
+    public get averageFrameRate() {
+        return this.ffProbeStream.avg_frame_rate;
+    }
+
+    public get totalFrames() {
+        return Number(this.ffProbeStream.tags['NUMBER_OF_FRAMES']);
+    }
+
+    // Size in bytes
+    public get size() {
+        if (this.ffProbeStream.tags['NUMBER_OF_BYTES']) {
+            return Number(this.ffProbeStream.tags['NUMBER_OF_BYTES']);
+        } else {
+            return (this.duration * this.bitrate ?? 0) / 8;
         }
     }
 
